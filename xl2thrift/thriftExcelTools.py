@@ -370,7 +370,7 @@ def parseWorkbook(workbook):
 		parseSheet(sheet)
 
 def parseFile(path):
-# 	print('========== Workbook %s ============' % (path))
+	Log('========== Workbook %s ============' % (path))
 	workbook = load_workbook(path, read_only = True, data_only = True)
 	parseWorkbook(workbook)
 
@@ -387,7 +387,7 @@ enums = {}
 import inspect
 
 def convertXlsx():
-	Log('Hi from thriftify: Loading <%s> from: <%s>' % (args.namespace, args.gen_py))
+	Log('Hi from convertXlsx: Loading <%s> from: <%s>' % (args.namespace, args.gen_py))
 
 	sys.path.append('%s' % (args.gen_py))
 	ConfigModule = importlib.import_module('%s.ttypes' % (args.namespace))
@@ -435,9 +435,6 @@ def convertXlsx():
 	transport = TTransport.TMemoryBuffer(buf)
 	protocol = ThriftProtocol(transport)
 	Data = None
-	# Data = dataClass()
 	Data = ConfigModule.ConfigData()
 	Data.read(protocol)
 	Data.validate()
-
-# thriftify()

@@ -1,8 +1,8 @@
 from setuptools import setup
 
-setup(name='thriftify',
-      version='0.1.5',
-      description='Converts xlsx files into thrift binary or json blobs',
+setup(name='xl2thrift',
+      version='0.0.1',
+      description='Converts xlsx files into thrift files that can be deserialized in many programming languages',
       long_description='Uses thrift-generated python reflection classes to match spreadsheet data with your thrift file. You can then load the resulting blob in any language supported by thrift.',
       long_description_content_type='text/x-rst',
       classifiers=[
@@ -11,11 +11,11 @@ setup(name='thriftify',
         'Programming Language :: Python :: 3.8',
       ],
       keywords='thrift config',
-      url='http://github.com/ohthepain/thriftify',
+      url='http://github.com/ohthepain/xl2thrift',
       author='Paul Wilkinson',
       author_email='paul@thisco.co',
       license='MIT',
-      packages=['thriftify'],
+      packages=['xl2thrift'],
       install_requires=[
             'openpyxl',
             'datetime',
@@ -23,10 +23,9 @@ setup(name='thriftify',
             'argparse',
             'datetime',
       ],
-      # scripts=['bin/thriftify_cli'],
       entry_points = {
         'console_scripts': [
-          'thriftify=thriftify.command_line:main',
+          'xl2thrift=xl2thrift.command_line:main',
         ],
       },
       zip_safe=False)

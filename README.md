@@ -1,4 +1,4 @@
-# thriftify
+# xl2thrift
 
 Converts xlsx files into thrift-loadable binary or json blobs
 [XLSX Format](https://guides.github.com/features/mastering-markdown/)

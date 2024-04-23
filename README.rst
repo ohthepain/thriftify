@@ -1,17 +1,14 @@
-thriftify
+xl2thrift
 --------
 
 Run on the command line::
 
-    >>> thriftify
-
+    >>> xl2thrift
 
 You can also import it as a python library::
 
-    >>> import thriftify
-    >>> thriftify.main()
-
-
+    >>> import xl2thrift
+    >>> xl2thrift.main()
 
 Converts xlsx files into thrift-loadable binary or json blobs
 [XLSX Format](https://guides.github.com/features/mastering-markdown/)
