@@ -23,7 +23,7 @@ setup(name='thriftify',
             'argparse',
             'datetime',
       ],
-      scripts=['bin/thriftify_cli'],
+      # scripts=['bin/thriftify_cli'],
       entry_points = {
         'console_scripts': [
           'thriftify=thriftify.command_line:main',

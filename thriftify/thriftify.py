@@ -392,34 +392,7 @@ def thriftify():
 	sys.path.append('%s' % (args.gen_py))
 	ConfigModule = importlib.import_module('%s.ttypes' % (args.namespace))
 	globals()['Data'] = ConfigModule.ConfigData()
-	# print('Data: <%s>' % (Data))
-	# globals()['Data'] = dataClass()
 	Data = globals()['Data']
-
-	# # location = '../Thrift/gen-py/Yoga/Config/ttypes.py'
-	# location = '%s/%s/ttypes.py' % (args.gen_py, args.namespace)
-	# # Log('location <%s>' % (location))
-	# spec = importlib.util.spec_from_file_location(args.namespace + ".ttypes", location)
-	# # print('---> %s' % (spec))
-	# ConfigModule = importlib.util.module_from_spec(spec)
-	# print('ConfigModule ---> %s' % (ConfigModule))
-	# print(inspect.getmembers(ConfigModule))
-
-	# location = '%s/%s/constants.py' % (args.gen_py, args.namespace)
-	# # Log('location <%s>' % (location))
-	# spec = importlib.util.spec_from_file_location(args.namespace + ".constants", location)
-	# ConfigConstants = importlib.util.module_from_spec(spec)
-	# print('ConfigConstants ---> %s' % (ConfigConstants))
-
-	# Data = ConfigModule.ConfigData()
-
-	# # sys.path.append(args.gen_py)
-	# # ConfigModule = importlib.import_module('%s.ttypes' % (args.namespace))
-	# # ConfigConstants = importlib.import_module('%s.constants' % (args.namespace))
-	# dataClass = getattr(ConfigModule, 'Config.Yoga.ttypes.ConfigData')
-	# # dataClass = getattr(ConfigModule, args.class_name)
-	# globals()['Data'] = dataClass()
-	# Data = globals()['Data']
 
 	sheetInfo = None
 
