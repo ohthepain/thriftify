@@ -1,12 +1,13 @@
 import sys, os
 import importlib
+import argparse
+import datetime
+
 import thrift
 from thrift.transport import TTransport
 from thrift.Thrift import TType
 from openpyxl import Workbook
 from openpyxl import load_workbook
-import argparse
-import datetime
 import openpyxl
 
 parser = argparse.ArgumentParser(description='Excel converter')
@@ -27,16 +28,6 @@ try:
     args = parser.parse_args()
 except IOError as msg:
     parser.error(str(msg))
-
-sys.path.append(args.gen_py)
-ConfigModule = importlib.import_module('%s.ttypes' % (args.namespace))
-ConfigConstants = importlib.import_module('%s.constants' % (args.namespace))
-dataClass = getattr(ConfigModule, args.class_name)
-Data = dataClass()
-
-typeEntries = {}
-sheetInfo = None
-enums = {}
 
 def stringToName(s):
 	name = s.split("--", 1)[0].strip().replace(" ", "")
@@ -134,10 +125,12 @@ class TypeEntry:
 		print(("TypeEntry: %s in Data[%d], self.valueType %s" % (self.name, self.fieldNum, self.valueType)))
 
 def makeTypeEntries(Data):
+	typeEntries = {}
 	for spec in Data.thrift_spec:
 		typeEntry = TypeEntry(spec)
 		if typeEntry != None:
 			typeEntries[typeEntry.name] = typeEntry
+	return typeEntries
 
 def old_countActiveColumns(sheet):
 	count = 0
@@ -386,46 +379,92 @@ def ensureDir(file_path):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-members = [attr for attr in dir(Data) if not callable(getattr(Data, attr)) and not attr.startswith("__")]
+# Globals
+typeEntries = {}
+Data = {}
+enums = {}
 
-if args.enums:
-	parseEnums(enums)
-makeTypeEntries(Data)
+import inspect
 
-for root, dirs, files in os.walk("."):
-	for file_ in files:
-		if file_[:2] != "~$" and file_[:2] != "--" and file_.lower().endswith(".xlsx"):
-			if not file_.lower().endswith("!.xlsx"):
-				parseFile(os.path.join(root, file_))
+def thriftify():
+	Log('Hi from thriftify: Loading <%s> from: <%s>' % (args.namespace, args.gen_py))
+
+	sys.path.append('%s' % (args.gen_py))
+	ConfigModule = importlib.import_module('%s.ttypes' % (args.namespace))
+	globals()['Data'] = ConfigModule.ConfigData()
+	# print('Data: <%s>' % (Data))
+	# globals()['Data'] = dataClass()
+	Data = globals()['Data']
+
+	# # location = '../Thrift/gen-py/Yoga/Config/ttypes.py'
+	# location = '%s/%s/ttypes.py' % (args.gen_py, args.namespace)
+	# # Log('location <%s>' % (location))
+	# spec = importlib.util.spec_from_file_location(args.namespace + ".ttypes", location)
+	# # print('---> %s' % (spec))
+	# ConfigModule = importlib.util.module_from_spec(spec)
+	# print('ConfigModule ---> %s' % (ConfigModule))
+	# print(inspect.getmembers(ConfigModule))
+
+	# location = '%s/%s/constants.py' % (args.gen_py, args.namespace)
+	# # Log('location <%s>' % (location))
+	# spec = importlib.util.spec_from_file_location(args.namespace + ".constants", location)
+	# ConfigConstants = importlib.util.module_from_spec(spec)
+	# print('ConfigConstants ---> %s' % (ConfigConstants))
+
+	# Data = ConfigModule.ConfigData()
+
+	# # sys.path.append(args.gen_py)
+	# # ConfigModule = importlib.import_module('%s.ttypes' % (args.namespace))
+	# # ConfigConstants = importlib.import_module('%s.constants' % (args.namespace))
+	# dataClass = getattr(ConfigModule, 'Config.Yoga.ttypes.ConfigData')
+	# # dataClass = getattr(ConfigModule, args.class_name)
+	# globals()['Data'] = dataClass()
+	# Data = globals()['Data']
+
+	sheetInfo = None
+
+	if args.enums:
+		globals()['enums'] = parseEnums(enums)
+	globals()['typeEntries'] = makeTypeEntries(Data)
+
+	for root, dirs, files in os.walk("."):
+		for file_ in files:
+			if file_[:2] != "~$" and file_[:2] != "--" and file_.lower().endswith(".xlsx"):
+				if not file_.lower().endswith("!.xlsx"):
+					parseFile(os.path.join(root, file_))
 
 
-for root, dirs, files in os.walk("."):
-	for file_ in files:
-		if file_[:2] != "~$" and file_[:2] != "--" and file_.lower().endswith(".xlsx"):
-			if not args.release and file_.endswith('!.xlsx'):
-				print(('Including debug workbook %s' % (file_)))
-				parseFile(os.path.join(root, file_))
+	for root, dirs, files in os.walk("."):
+		for file_ in files:
+			if file_[:2] != "~$" and file_[:2] != "--" and file_.lower().endswith(".xlsx"):
+				if not args.release and file_.endswith('!.xlsx'):
+					print(('Including debug workbook %s' % (file_)))
+					parseFile(os.path.join(root, file_))
 
+	transport = TTransport.TMemoryBuffer()
+	ThriftProtocol = getattr(importlib.import_module("thrift.protocol.%s" % (args.thrift_protocol)), args.thrift_protocol)
+	protocol = ThriftProtocol(transport)
+	Data.schemaVersionId = 1
+	Data.write(protocol)
 
-transport = TTransport.TMemoryBuffer()
-ThriftProtocol = getattr(importlib.import_module("thrift.protocol.%s" % (args.thrift_protocol)), args.thrift_protocol)
-protocol = ThriftProtocol(transport)
-Data.schemaVersionId = 1
-Data.write(protocol)
+	# Write output file
+	configPath = args.output
+	buf = transport.getvalue()
+	with open(configPath, 'wb') as f:
+		f.write(buf)
 
-configPath = args.output
-buf = transport.getvalue()
-with open(configPath, 'wb') as f:
-	f.write(buf)
+	# Read and validate
+	buf = None
 
-buf = None
+	with open(configPath, 'rb') as f:
+		buf = f.read()
 
-with open(configPath, 'rb') as f:
-	buf = f.read()
+	transport = TTransport.TMemoryBuffer(buf)
+	protocol = ThriftProtocol(transport)
+	Data = None
+	# Data = dataClass()
+	Data = ConfigModule.ConfigData()
+	Data.read(protocol)
+	Data.validate()
 
-transport = TTransport.TMemoryBuffer(buf)
-protocol = ThriftProtocol(transport)
-Data = None
-Data = dataClass()
-Data.read(protocol)
-Data.validate()
+thriftify()
