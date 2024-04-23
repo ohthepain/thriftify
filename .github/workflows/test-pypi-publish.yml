@@ -6,12 +6,12 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Publish PyPI
+name: Publish PyPI Test
 
 on:
   push:
     branches:
-      - main
+      - dev
 
 permissions:
   contents: read
@@ -39,6 +39,5 @@ jobs:
     - name: Publish package to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1.8
       with:
-        password: ${{ secrets.PYPI_THRIFTIFY_API_TOKEN }}
-        # repository-url: https://pypi.org/
-
+        password: ${{ secrets.TEST_PYPI_THRIFTIFY_API_TOKEN }}
+        repository-url: https://test.pypi.org/legacy/
