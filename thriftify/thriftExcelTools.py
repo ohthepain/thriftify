@@ -386,7 +386,7 @@ enums = {}
 
 import inspect
 
-def thriftify():
+def convertXlsx():
 	Log('Hi from thriftify: Loading <%s> from: <%s>' % (args.namespace, args.gen_py))
 
 	sys.path.append('%s' % (args.gen_py))
@@ -440,4 +440,4 @@ def thriftify():
 	Data.read(protocol)
 	Data.validate()
 
-thriftify()
+# thriftify()

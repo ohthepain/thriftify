@@ -1,1 +1,1 @@
-from .thriftify import thriftify
+from .thriftExcelTools import convertXlsx

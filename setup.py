@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='thriftify',
-      version='0.1.1',
+      version='0.1.5',
       description='Converts xlsx files into thrift binary or json blobs',
       long_description='Uses thrift-generated python reflection classes to match spreadsheet data with your thrift file. You can then load the resulting blob in any language supported by thrift.',
       long_description_content_type='text/x-rst',

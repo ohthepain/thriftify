@@ -1,4 +1,4 @@
-import thriftify
+from .thriftExcelTools import convertXlsx
 
 def main():
-    thriftify.thriftify()
+    convertXlsx()
