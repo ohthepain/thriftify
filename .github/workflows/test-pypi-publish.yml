@@ -37,6 +37,7 @@ jobs:
     - name: Test with pytest
       run: |
         pip install pytest pytest-cov
+        xl2thrift --namespace BadEnergy.Config --thrift_protocol TJSONProtocol --gen_py tests/gen-py --output tests/config.bin --class_name Data --enums tests/Excel/enums.txt tests/Excel/*.xlsx 
         pytest
     - name: Build package
       run: python setup.py sdist
