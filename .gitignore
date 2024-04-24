@@ -1,3 +1,5 @@
+config.bin
+
 # Compiled python modules.
 *.pyc
 
