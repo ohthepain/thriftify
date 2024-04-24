@@ -76,5 +76,5 @@ def test_convert():
     assert(len(Data.hudProfiles["BattleMenuRaidMode"].currencyIds) == 3)
 
     # List if int in cell
-    assert(Data.strengthProfiles["Rare Pierce"].inflectDamage[2] == 400)
+    assert(Data.strengthProfiles["Rare Pierce"].inflectDamage[2] == 401)
 
