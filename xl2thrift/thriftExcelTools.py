@@ -11,7 +11,7 @@ from openpyxl import load_workbook
 import openpyxl
 
 def Log(s):
-	if args.verbose:
+	if verbose:
 	 	print(s)
 
 def stringToName(s):
@@ -139,6 +139,7 @@ def	countActiveColumns(sheet):
 			count += 1
 
 def getRowObject(sheetInfo, row, columnFieldSpec):
+	enums = globals()['enums']
 	if len(row) == 0 or row[0].value == None:
 		return
 	tablename = sheetInfo.tablename
@@ -159,8 +160,9 @@ def getRowObject(sheetInfo, row, columnFieldSpec):
 				enumClass = None
 				enumLookup = typeEntry.valueType.__name__ + '.' + info.attributeName
 				if enumLookup in enums:
-					enumClassName = enums[enumLookup]
-					enumClass = getattr(ConfigModule, enumClassName)
+					enumClass = getEnumClass(enumLookup)
+					# enumClassName = enums[enumLookup]
+					# enumClass = getattr(ConfigModule, enumClassName)
 
 				if column in columnFieldSpec:
 					containerType = columnFieldSpec[column][1]
@@ -220,6 +222,7 @@ def getRowObject(sheetInfo, row, columnFieldSpec):
 def parseSheet(sheet):
 	sheetInfo = SheetInfo(sheet)
 	numcolumns = sheetInfo.numcolumns
+	enums = globals()['enums']
 	#sheetInfo.dump()
 	tablename = stringToName(sheet.title)
 	if not tablename in typeEntries:
@@ -302,8 +305,9 @@ def parseSheet(sheet):
 									if subValueType == TType.I32:
 										enumLookup = typeEntry.valueType.__name__ + '.' + fieldSpec[2]
 										if enumLookup in enums:
-											enumClassName = enums[enumLookup]
-											enumClass = getattr(ConfigModule, enumClassName)
+											enumClass = getEnumClass(enumLookup)
+											# enumClassName = enums[enumLookup]
+											# enumClass = getattr(ConfigModule, enumClassName)
 											value.append(enumClass._NAMES_TO_VALUES[v])
 										else:
 											value.append(int(v))
@@ -349,6 +353,13 @@ def parseEnums(path):
 		for line in myfile:
 			name, var = line.split("=")
 			enums[name.strip()] = var.strip()
+	return enums
+
+def getEnumClass(enumLookup):
+	ConfigModule = globals()['ConfigModule']
+	enumClassName = enums[enumLookup]
+	enumClass = getattr(ConfigModule, enumClassName)
+	return enumClass
 
 def parseWorkbook(workbook):
 	for sheet in workbook:
@@ -376,54 +387,71 @@ def usage():
 typeEntries = {}
 Data = {}
 enums = {}
-args = {}
+verbose = False
+
+def handleTypeArg(s):
+	print('handleTypeArg: %s' % (x))
 
 def convertXlsx():
 
 	parser = argparse.ArgumentParser(description='Excel converter')
+	parser.add_argument('patterns', nargs='*', default="*.xlsx", help='list of files, folders and globs')
 	parser.add_argument('--namespace', help='namespace from thrift file', required=True)
 	parser.add_argument('--thrift_protocol', choices=('TCompactProtocol', 'TJSONProtocol', 'TBinaryProtocol'), default='TJSONProtocol', required=True)
 	parser.add_argument('--gen_py', default='', help="location of thrift-generated python source folder (thrift --gen py <thriftfile>)", required=True)
 	parser.add_argument('--output', default='config.bin', required=False, help="where to save output")
 	parser.add_argument('--class_name', default='Data', help="name of the class (without namespace) in your thrift file that contains all the data")
 	parser.add_argument('--verbose', action='store_true', help="show detailed output")
-	parser.add_argument('--enums', action='store_true', help="name of text file that stores a list of enums (coming soon)")
+	parser.add_argument('--enums', help="name of text file that stores a list of enums (coming soon)")
 	parser.add_argument('--release', action='store_true', help='do not process folders ending with Debug')
 
 	try:
-		globals()['args'] = parser.parse_args()
+		args = parser.parse_args()
 	except IOError as msg:
 		parser.error(str(msg))
 		usage()
 
-	Log('Hi from convertXlsx: Loading <%s> from: <%s>' % (args.namespace, args.gen_py))
+	gen_py = args.gen_py
+	namespace = args.namespace
+	class_name = args.class_name
+	enums_path = args.enums
+	print('enums_path %s' % (enums_path))
+	release = args.release
+	thrift_protocol = args.thrift_protocol
+	output = args.output
+	return doConvertXlsx(args.patterns, namespace=namespace, thrift_protocol=thrift_protocol, gen_py=gen_py, class_name=class_name, output=output, enums_path=enums_path, release=release, verbose=args.verbose)
 
-	sys.path.append('%s' % (args.gen_py))
+def doConvertXlsx(patterns, namespace, thrift_protocol, gen_py, class_name='Data', output='config.bin', enums_path=None, release=False, verbose=False):
+	print('enums_path %s' % (enums_path))
+	print('patterns: %s' % (patterns))
+	globals()['verbose'] = verbose
+	sys.path.append(gen_py)
 	ConfigModule = {}
 	try:
-		ConfigModule = importlib.import_module('%s.ttypes' % (args.namespace))
+		ConfigModule = importlib.import_module('%s.ttypes' % (namespace))
 	except:
-		print('Failed to load thrift-generated module (%s.ttypes)' % (args.namespace))
-		print('Check that the namespace in your thrift file matches the --namespace arg (%s)' % (args.namespace))
-		print('and that the --gen_py arg (%s) points to the correct folder' % (args.gen_py))
-		exit()
+		print('Failed to load thrift-generated module (%s.ttypes)' % (namespace))
+		print('Check that the namespace in your thrift file matches the --namespace arg (%s)' % (namespace))
+		print('and that the --gen_py arg (%s) points to the correct folder' % (gen_py))
+		return False
 
 	Log(ConfigModule)
+	globals()['ConfigModule'] = ConfigModule
 
 	try:
-		dataClass = getattr(ConfigModule, args.class_name)
+		dataClass = getattr(ConfigModule, class_name)
 	except:
-		print('Failed create an instance of class (%s) specified in the --class_name arg' % (args.class_name))
+		print('Failed create an instance of class (%s) specified in the --class_name arg' % (class_name))
 		print('Please make sure that your --class_name arg refers to the correct class in your thrift file (and in the source code in --gen_py)')
-		exit()
+		return False
 
 	globals()['Data'] = dataClass()
 	Data = globals()['Data']
 
 	sheetInfo = None
 
-	if args.enums:
-		globals()['enums'] = parseEnums(enums)
+	if enums_path:
+		globals()['enums'] = parseEnums(enums_path)
 	globals()['typeEntries'] = makeTypeEntries(Data)
 
 	for root, dirs, files in os.walk("."):
@@ -432,22 +460,21 @@ def convertXlsx():
 				if not file_.lower().endswith("!.xlsx"):
 					parseFile(os.path.join(root, file_))
 
-
 	for root, dirs, files in os.walk("."):
 		for file_ in files:
 			if file_[:2] != "~$" and file_[:2] != "--" and file_.lower().endswith(".xlsx"):
-				if not args.release and file_.endswith('!.xlsx'):
+				if not release and file_.endswith('!.xlsx'):
 					print(('Including debug workbook %s' % (file_)))
 					parseFile(os.path.join(root, file_))
 
 	transport = TTransport.TMemoryBuffer()
-	ThriftProtocol = getattr(importlib.import_module("thrift.protocol.%s" % (args.thrift_protocol)), args.thrift_protocol)
+	ThriftProtocol = getattr(importlib.import_module("thrift.protocol.%s" % (thrift_protocol)), thrift_protocol)
 	protocol = ThriftProtocol(transport)
 	Data.schemaVersionId = 1
 	Data.write(protocol)
 
 	# Write output file
-	configPath = args.output
+	configPath = output
 	buf = transport.getvalue()
 	with open(configPath, 'wb') as f:
 		f.write(buf)
@@ -461,9 +488,10 @@ def convertXlsx():
 	transport = TTransport.TMemoryBuffer(buf)
 	protocol = ThriftProtocol(transport)
 	Data = None
-	Data = ConfigModule.ConfigData()
+	Data = dataClass()
+	# Data = ConfigModule.ConfigData()
 	Data.read(protocol)
-	Data.validate()
+	return Data.validate()
 
 if __name__ == '__main__':
     convertXlsx()

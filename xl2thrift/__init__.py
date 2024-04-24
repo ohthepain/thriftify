@@ -1,1 +1,1 @@
-from .thriftExcelTools import convertXlsx
+from .thriftExcelTools import convertXlsx, doConvertXlsx
