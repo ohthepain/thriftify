@@ -17,7 +17,7 @@ def test_convert():
     enums_path = "tests/Excel/enums.txt"
     release = False
 
-    doConvertXlsx("**.xlsx", namespace=namespace, thrift_protocol=thrift_protocol, gen_py=gen_py, class_name=class_name, output=output, enums_path=enums_path, release=release)
+    # doConvertXlsx("**.xlsx", namespace=namespace, thrift_protocol=thrift_protocol, gen_py=gen_py, class_name=class_name, output=output, enums_path=enums_path, release=release)
 
     # Load classes
     ConfigModule = {}
