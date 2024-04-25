@@ -1,4 +1,7 @@
 config.bin
+/junit/
+.coverage
+coverage.xml
 
 # Compiled python modules.
 *.pyc
