@@ -33,13 +33,12 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install build setuptools thrift openpyxl
+        pip install build setuptools thrift openpyxl pytest pytest-cov
     - name: Test with pytest
       run: |
-        pip install pytest pytest-cov
+        mkdir test
         pip install .
-        xl2thrift --namespace BadEnergy.Config --thrift_protocol TJSONProtocol --gen_py tests/gen-py --output config.bin --class_name Data --enums tests/Excel/enums.txt tests/Excel/*.xlsx 
-        pytest
+        pytest --cov=xl2thrift --cov-report=xml --cov-report=html tests
     - name: Build package
       run: python setup.py sdist
     - name: Publish package to PyPI

@@ -1,23 +1,29 @@
 import sys
 import importlib
+import subprocess
 
 import pytest
 import thrift
 from thrift.transport import TTransport
 from thrift.Thrift import TType
 
-from xl2thrift import doConvertXlsx
+from xl2thrift import convertXlsxToThrift
+from xl2thrift import usage
 
 def test_convert():
     namespace = "BadEnergy.Config"
     thrift_protocol = "TJSONProtocol"
-    gen_py = "tests/gen-py/"
+    gen_py = "tests/gen-py"
     class_name = "Data"
-    output = "config.bin"
+    output = "tests/config.bin"
     enums_path = "tests/Excel/enums.txt"
     release = False
 
-    # doConvertXlsx("**.xlsx", namespace=namespace, thrift_protocol=thrift_protocol, gen_py=gen_py, class_name=class_name, output=output, enums_path=enums_path, release=release)
+    usage()
+
+    convertXlsxToThrift("**.xlsx", namespace=namespace, thrift_protocol=thrift_protocol, gen_py=gen_py, class_name=class_name, output=output, enums_path=enums_path, release=release, verbose=True)
+    # subprocess.call(['xl2thrift', 'tests/Excel/**.xlsx', '--namespace %s' % (namespace), '--thrift_protocol %s' % (thrift_protocol), '--gen_py %s' % (gen_py), '--class_name %s' % (class_name), '--output %s' % (output), '--enums_path %s' % (enums_path), '--verbose']) 
+    # xl2thrift tests/Excel/*.xlsx --namespace BadEnergy.Config --thrift_protocol TJSONProtocol --gen_py tests/gen-py --output tests/config.bin --class_name Data --enums tests/Excel/enums.txt  
 
     # Load classes
     ConfigModule = {}
