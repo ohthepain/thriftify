@@ -8,7 +8,7 @@
 # don't forget to add your mutator script to __init__.py
 #
 
-from __main__ import ConfigModule
+from xl2thrift.mutate import ConfigModule
 from xl2thrift.mutate import Log
 
 def CreateUnlockedHeroesTables(data):

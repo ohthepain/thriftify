@@ -388,6 +388,12 @@ Data = {}
 enums = {}
 args = {}
 
+def list_matching_files(glob_patterns):
+    matched_files = []
+    for pattern in glob_patterns.split():
+        matched_files.extend(glob.glob(pattern))
+    return matched_files
+
 def convertXlsxToThrift(patterns, namespace, thrift_protocol, gen_py, class_name='Data', output='config.bin', enums_path=None, release=False, verbose=False):
 	globals()['verbose'] = verbose
 	sys.path.append(gen_py)
@@ -419,20 +425,34 @@ def convertXlsxToThrift(patterns, namespace, thrift_protocol, gen_py, class_name
 		globals()['enums'] = parseEnums(enums_path)
 	globals()['typeEntries'] = makeTypeEntries(Data)
 
-	for pattern in patterns:
-		for path in glob.glob(pattern, recursive=True):
-			file_ = os.path.basename(path)
-			if file_[:2] != "~$" and file_[:2] != "--" and file_.lower().endswith(".xlsx"):
-				if not file_.lower().endswith("!.xlsx"):
-					parseFile(path)
+	filenames = list_matching_files(patterns)
+	for path in filenames:
+		file_ = os.path.basename(path)
+		if file_[:2] != "~$" and file_[:2] != "--" and file_.lower().endswith(".xlsx"):
+			if not file_.lower().endswith("!.xlsx"):
+				parseFile(path)
 
 	# Debug sheets are added last so that they can overwrite 
-	for pattern in patterns:
-		for path in glob.glob(pattern, recursive=True):
-			file_ = os.path.basename(path)
-			if file_[:2] != "~$" and file_[:2] != "--" and file_.lower().endswith(".xlsx"):
-				if not release and file_.endswith('!.xlsx'):
-					parseFile(path)
+	for path in filenames:
+		file_ = os.path.basename(path)
+		if file_[:2] != "~$" and file_[:2] != "--" and file_.lower().endswith(".xlsx"):
+			if not release and file_.endswith('!.xlsx'):
+				parseFile(path)
+
+	# for pattern in patterns:
+	# 	for path in glob.glob(pattern, recursive=True):
+	# 		file_ = os.path.basename(path)
+	# 		if file_[:2] != "~$" and file_[:2] != "--" and file_.lower().endswith(".xlsx"):
+	# 			if not file_.lower().endswith("!.xlsx"):
+	# 				parseFile(path)
+
+	# Debug sheets are added last so that they can overwrite 
+	# for pattern in patterns:
+	# 	for path in glob.glob(pattern, recursive=True):
+	# 		file_ = os.path.basename(path)
+	# 		if file_[:2] != "~$" and file_[:2] != "--" and file_.lower().endswith(".xlsx"):
+	# 			if not release and file_.endswith('!.xlsx'):
+	# 				parseFile(path)
 
 	transport = TTransport.TMemoryBuffer()
 	ThriftProtocol = getattr(importlib.import_module("thrift.protocol.%s" % (thrift_protocol)), thrift_protocol)

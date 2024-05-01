@@ -26,6 +26,7 @@ def load_modules(folder_path):
 
     # Import modules dynamically
     for name in module_names:
+        print(name)
         spec = importlib.util.spec_from_file_location(name, os.path.join(folder_path, name + '.py'))
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
@@ -71,8 +72,8 @@ def mutate(mutators_folder, gen_py, namespace, class_name='Data', inputPath='con
     modules = load_modules(mutators_folder)
     for module in modules:
         if '__mutators' in dir(module):
-            mutator_names = module.__mutators
-            for mutator_function in mutator_names:
+            # mutator_names = module.__mutators
+            for mutator_function in module.__mutators:
                 mutator_function(Data)
 
     transport = TTransport.TMemoryBuffer()

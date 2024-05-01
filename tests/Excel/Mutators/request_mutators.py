@@ -2,7 +2,7 @@
 import sys
 import importlib
 
-from __main__ import ConfigModule
+from xl2thrift.mutate import ConfigModule
 from xl2thrift.mutate import Log
 
 def RequestInfo(data):

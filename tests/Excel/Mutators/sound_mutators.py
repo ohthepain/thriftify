@@ -3,7 +3,7 @@
 from xl2thrift.mutate import Log
 
 def SoundClipLists(data):
-	#print("SoundClipLists mutator ...")
+	print("SoundClipLists mutator ...")
 	if hasattr(data, 'soundClips'):
 		for soundClipId in data.soundClips:
 			soundClip = data.soundClips[soundClipId]
@@ -13,5 +13,6 @@ def SoundClipLists(data):
 				if data.soundClipLists[soundClip.soundClipListId].soundClipIds == None:
 					data.soundClipLists[soundClip.soundClipListId].soundClipIds = []
 				data.soundClipLists[soundClip.soundClipListId].soundClipIds.append(soundClipId)
+	print("SoundClipLists mutator ... dunn")
 
 __mutators = [SoundClipLists]

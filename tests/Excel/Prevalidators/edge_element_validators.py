@@ -1,7 +1,6 @@
 from __main__ import __Check
 from __main__ import __Warn
 from __main__ import Log
-# from __main__ import ConfigModule
 
 def EdgeElements(data):
 	Log("EdgeElements prevalidator ...")

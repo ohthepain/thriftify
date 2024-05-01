@@ -1,6 +1,6 @@
 from __main__ import __Check
 from __main__ import __Warn
-from __main__ import ConfigModule
+from xl2thrift.mutate import ConfigModule
 from __main__ import Log
 
 def HeroSkillIcons(data):

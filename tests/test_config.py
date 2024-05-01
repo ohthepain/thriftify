@@ -31,6 +31,8 @@ def test_convert():
         ConfigModule = importlib.import_module('%s.ttypes' % (namespace))
     except:
         pytest.fail('Failed to import thrift-generated module (%s.ttypes) from path <%s>' % (namespace, gen_py))
+    finally:
+        sys.path.remove('%s' % (gen_py))
 
     try:
         dataClass = getattr(ConfigModule, class_name)
