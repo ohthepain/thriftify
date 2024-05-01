@@ -39,6 +39,7 @@ jobs:
         mkdir test
         pip install .
         pytest --cov=xl2thrift --cov-report=xml --cov-report=html tests
+        pytest --cov=xl2thrift --cov-report=xml --cov-report=html tests_mutators
     - name: Build package
       run: python setup.py sdist
     - name: Publish package to PyPI
