@@ -2978,7 +2978,7 @@ struct Data
     59: optional list<AssetListEntry> assetListEntries
     // Populated by mutator
     60: optional map<string, AssetList> assetLists
-	62: required map<CurrencyID, Currency> currencies
+	62: optional map<CurrencyID, Currency> currencies
 	63: optional map<CurrencyID, CurrencyRecharge> currencyRecharges
 	64: optional map<AttackID, Attack> attacks
 	65: optional map<AttackID, RadialProjectileAttack> radialProjectileAttacks

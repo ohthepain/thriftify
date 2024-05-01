@@ -3,7 +3,7 @@ import sys
 import importlib
 
 from __main__ import ConfigModule
-from __main__ import Log
+from xl2thrift.mutate import Log
 
 def RequestInfo(data):
 	Log("RequestInfo mutator ...")

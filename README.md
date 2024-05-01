@@ -1,3 +1,12 @@
+# setup
+
+> python3 -m venv .venv
+> source .venv/bin/activate
+> pip install -r requirements.txt
+
+to run tests just do
+> pytest
+
 # xl2thrift
 
 Converts xlsx files into thrift-loadable binary or json blobs

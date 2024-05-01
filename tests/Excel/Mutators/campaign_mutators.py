@@ -9,7 +9,7 @@
 #
 
 from __main__ import ConfigModule
-from __main__ import Log
+from xl2thrift.mutate import Log
 
 def CreateUnlockedHeroesTables(data):
 	#print("CreateUnlockedHeroesTables mutator ...")

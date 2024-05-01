@@ -1,6 +1,7 @@
 import sys, os
 import importlib
 import datetime
+import glob
 
 import thrift
 from thrift.transport import TTransport
@@ -8,6 +9,8 @@ from thrift.Thrift import TType
 from openpyxl import Workbook
 from openpyxl import load_workbook
 import openpyxl
+
+from .exceptions import EnumException, ThriftGeneratedModuleException, FileNotFoundException
 
 def Log(s):
 	verbose = globals()['verbose']
@@ -26,10 +29,10 @@ class SheetColumnEntry:
 		self.title = topcell
 		self.attributeName = stringToName(topcell)
 		self.columnNum = cnum
-		self.dump()
-	def dump(self):
-		if globals()['verbose']:
-			print("SheetColumnEntry for column %d has attributeName %s (%s)" % (self.columnNum, self.attributeName, self.title))
+	# 	self.dump()
+	# def dump(self):
+	# 	if globals()['verbose']:
+	# 		print("SheetColumnEntry for column %d has attributeName %s (%s)" % (self.columnNum, self.attributeName, self.title))
 
 class SheetInfo:
 	title = None
@@ -67,7 +70,7 @@ class SheetInfo:
 			for c in range(1,len(self.columnInfo) + 1):
 				columnInfo = self.columnInfo[c]
 				if columnInfo != None:
-					print(("	column %d: column %d attribute name %s" % (c, columnInfo.columnNum, columnInfo.attributeName)))
+					print(("	column %d: cattribute name %s" % (c, columnInfo.attributeName)))
 			print("++++++++++++++++++++++++++++++")
 
 # type info for a field in the Data class
@@ -204,7 +207,10 @@ def getRowObject(sheetInfo, row, columnFieldSpec):
 										print(("WARNING: the string '%s' has leading/trailing spaces" % (v)))
 
 				elif enumClass != None:
-					value = enumClass._NAMES_TO_VALUES[value]
+					try:
+						value = enumClass._NAMES_TO_VALUES[value]
+					except:
+						raise EnumException('ERROR: undefined enum value <%s>' % (value))
 			# get member for column
 			info = sheetInfo.columnInfo[column]
 			setattr(new_object, info.attributeName, value)
@@ -344,10 +350,13 @@ def parseSheet(sheet):
 			new_object.validate()
 
 def parseEnums(path):
-	with open(path) as myfile:
-		for line in myfile:
-			name, var = line.split("=")
-			enums[name.strip()] = var.strip()
+	try:
+		with open(path) as myfile:
+			for line in myfile:
+				name, var = line.split("=")
+				enums[name.strip()] = var.strip()
+	except:
+		raise FileNotFoundException('Enums file <%s> not found' % (path))
 	return enums
 
 def getEnumClass(enumLookup):
@@ -380,8 +389,6 @@ enums = {}
 args = {}
 
 def convertXlsxToThrift(patterns, namespace, thrift_protocol, gen_py, class_name='Data', output='config.bin', enums_path=None, release=False, verbose=False):
-	print('verbose %s' % (verbose))
-	print('patterns: %s' % (patterns))
 	globals()['verbose'] = verbose
 	sys.path.append(gen_py)
 	ConfigModule = {}
@@ -391,17 +398,17 @@ def convertXlsxToThrift(patterns, namespace, thrift_protocol, gen_py, class_name
 		print('Failed to load thrift-generated module (%s.ttypes)' % (namespace))
 		print('Check that the namespace in your thrift file matches the --namespace arg (%s)' % (namespace))
 		print('and that the --gen_py arg (%s) points to the correct folder' % (gen_py))
-		return False
+		raise ThriftGeneratedModuleException('Failed to load thrift-generated module in <%s> called (%s.ttypes)' % (gen_py, namespace))
 
+	sys.path.remove(gen_py)
 	Log(ConfigModule)
 	globals()['ConfigModule'] = ConfigModule
 
 	try:
 		dataClass = getattr(ConfigModule, class_name)
 	except:
-		print('Failed create an instance of class (%s) specified in the --class_name arg' % (class_name))
 		print('Please make sure that your --class_name arg refers to the correct class in your thrift file (and in the source code in --gen_py)')
-		return False
+		raise FileNotFoundException('Failed create an instance of class (%s) specified in the --class_name arg' % (class_name))
 
 	globals()['Data'] = dataClass()
 	Data = globals()['Data']
@@ -412,18 +419,39 @@ def convertXlsxToThrift(patterns, namespace, thrift_protocol, gen_py, class_name
 		globals()['enums'] = parseEnums(enums_path)
 	globals()['typeEntries'] = makeTypeEntries(Data)
 
-	for root, dirs, files in os.walk("."):
-		for file_ in files:
+	for pattern in patterns:
+		for path in glob.glob(pattern, recursive=True):
+			file_ = os.path.basename(path)
 			if file_[:2] != "~$" and file_[:2] != "--" and file_.lower().endswith(".xlsx"):
 				if not file_.lower().endswith("!.xlsx"):
-					parseFile(os.path.join(root, file_))
+					parseFile(path)
 
-	for root, dirs, files in os.walk("."):
-		for file_ in files:
+	# Debug sheets are added last so that they can overwrite 
+	for pattern in patterns:
+		for path in glob.glob(pattern, recursive=True):
+			file_ = os.path.basename(path)
 			if file_[:2] != "~$" and file_[:2] != "--" and file_.lower().endswith(".xlsx"):
 				if not release and file_.endswith('!.xlsx'):
-					print(('Including debug workbook %s' % (file_)))
-					parseFile(os.path.join(root, file_))
+					parseFile(path)
+
+		# for file_ in glob.glob(pattern, recursive=True):
+		# 	if file_[:2] != "~$" and file_[:2] != "--" and file_.lower().endswith(".xlsx"):
+		# 		if not release and file_.endswith('!.xlsx'):
+		# 			print(('Including debug workbook %s' % (file_)))
+		# 			parseFile(os.path.join(root, file_))
+
+	# for root, dirs, files in os.walk("."):
+	# 	for file_ in files:
+	# 		if file_[:2] != "~$" and file_[:2] != "--" and file_.lower().endswith(".xlsx"):
+	# 			if not file_.lower().endswith("!.xlsx"):
+	# 				parseFile(os.path.join(root, file_))
+
+	# for root, dirs, files in os.walk("."):
+	# 	for file_ in files:
+	# 		if file_[:2] != "~$" and file_[:2] != "--" and file_.lower().endswith(".xlsx"):
+	# 			if not release and file_.endswith('!.xlsx'):
+	# 				print(('Including debug workbook %s' % (file_)))
+	# 				parseFile(os.path.join(root, file_))
 
 	transport = TTransport.TMemoryBuffer()
 	ThriftProtocol = getattr(importlib.import_module("thrift.protocol.%s" % (thrift_protocol)), thrift_protocol)

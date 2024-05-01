@@ -28234,8 +28234,6 @@ class Data(object):
         oprot.writeStructEnd()
 
     def validate(self):
-        if self.currencies is None:
-            raise TProtocolException(message='Required field currencies is unset!')
         return
 
     def __repr__(self):

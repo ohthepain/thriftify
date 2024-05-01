@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='xl2thrift',
-      version='0.0.4',
+      version='0.0.5',
       description='Converts xlsx files into thrift files that can be deserialized in many programming languages',
       long_description='Uses thrift-generated python reflection classes to match spreadsheet data with your thrift file. You can then load the resulting blob in any language supported by thrift.',
       long_description_content_type='text/x-rst',
@@ -26,6 +26,7 @@ setup(name='xl2thrift',
       entry_points = {
         'console_scripts': [
           'xl2thrift=xl2thrift.command_line:main',
+          'mutate=xl2thrift.mutate_cmd:mutateThriftBlob',
         ],
       },
       zip_safe=False)

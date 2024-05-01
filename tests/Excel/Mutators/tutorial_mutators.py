@@ -1,7 +1,7 @@
 # don't forget to add your mutator script to __init__.py
 
 import sys as __sys
-from __main__ import Log
+from xl2thrift.mutate import Log
 
 def __dumpTutorials(data):
 	for tutorialId in data.tutorials:
