@@ -434,25 +434,6 @@ def convertXlsxToThrift(patterns, namespace, thrift_protocol, gen_py, class_name
 				if not release and file_.endswith('!.xlsx'):
 					parseFile(path)
 
-		# for file_ in glob.glob(pattern, recursive=True):
-		# 	if file_[:2] != "~$" and file_[:2] != "--" and file_.lower().endswith(".xlsx"):
-		# 		if not release and file_.endswith('!.xlsx'):
-		# 			print(('Including debug workbook %s' % (file_)))
-		# 			parseFile(os.path.join(root, file_))
-
-	# for root, dirs, files in os.walk("."):
-	# 	for file_ in files:
-	# 		if file_[:2] != "~$" and file_[:2] != "--" and file_.lower().endswith(".xlsx"):
-	# 			if not file_.lower().endswith("!.xlsx"):
-	# 				parseFile(os.path.join(root, file_))
-
-	# for root, dirs, files in os.walk("."):
-	# 	for file_ in files:
-	# 		if file_[:2] != "~$" and file_[:2] != "--" and file_.lower().endswith(".xlsx"):
-	# 			if not release and file_.endswith('!.xlsx'):
-	# 				print(('Including debug workbook %s' % (file_)))
-	# 				parseFile(os.path.join(root, file_))
-
 	transport = TTransport.TMemoryBuffer()
 	ThriftProtocol = getattr(importlib.import_module("thrift.protocol.%s" % (thrift_protocol)), thrift_protocol)
 	protocol = ThriftProtocol(transport)
@@ -475,6 +456,5 @@ def convertXlsxToThrift(patterns, namespace, thrift_protocol, gen_py, class_name
 	protocol = ThriftProtocol(transport)
 	Data = None
 	Data = dataClass()
-	# Data = ConfigModule.ConfigData()
 	Data.read(protocol)
 	return Data.validate()
