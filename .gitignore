@@ -3,6 +3,8 @@ config.bin
 .coverage
 coverage.xml
 
+tests/config_out.bin
+
 # Compiled python modules.
 *.pyc
 
