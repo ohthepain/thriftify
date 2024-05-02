@@ -40,6 +40,7 @@ jobs:
         pip install .
         pytest --cov=xl2thrift --cov-report=xml --cov-report=html tests
         pytest --cov=xl2thrift --cov-report=xml --cov-report=html tests_mutators
+        pytest --cov=xl2thrift --cov-report=xml --cov-report=html tests_validators
     - name: Build package
       run: python setup.py sdist
     - name: Publish package to PyPI
