@@ -1,6 +1,6 @@
-from __main__ import __Check
-from __main__ import __Warn
-from __main__ import Log
+from xl2thrift.validate import __Check
+from xl2thrift.validate import __Warn
+from xl2thrift.validate import Log
 
 def __listGearTables():
 	# uncomment this if you want to generate loot tables

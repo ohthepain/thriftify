@@ -1,7 +1,7 @@
-from __main__ import __Check
-from __main__ import __Warn
-from __main__ import Log
-from xl2thrift.mutate import ConfigModule
+from xl2thrift.validate import __Check
+from xl2thrift.validate import __Warn
+from xl2thrift.validate import Log
+from xl2thrift.validate import ConfigModule
 
 def EnemySkills(data):
 	Log("Heroes prevalidator ...")

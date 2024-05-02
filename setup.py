@@ -27,6 +27,7 @@ setup(name='xl2thrift',
         'console_scripts': [
           'xl2thrift=xl2thrift.command_line:main',
           'mutate=xl2thrift.mutate_cmd:mutateThriftBlob',
+          'validate=xl2thrift.validate_cmd:validateThriftBlob',
         ],
       },
       zip_safe=False)
