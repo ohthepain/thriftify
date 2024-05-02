@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='xl2thrift',
-      version='0.0.7',
+      version='0.0.8',
       description='Converts xlsx files into thrift files that can be deserialized in many programming languages',
       long_description='Uses thrift-generated python reflection classes to match spreadsheet data with your thrift file. You can then load the resulting blob in any language supported by thrift.',
       long_description_content_type='text/x-rst',
